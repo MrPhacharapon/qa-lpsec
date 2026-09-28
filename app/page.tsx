@@ -127,7 +127,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [currentView, setCurrentView] = useState('home');
-  const [selectedYear, setSelectedYear] = useState('all');
   const [showDebug, setShowDebug] = useState(false);
 
   // Fetch data from Next.js Edge API Route
@@ -162,7 +161,6 @@ export default function HomePage() {
   // Reset scroll when changing views
   const handleViewChange = (viewId: string) => {
     setCurrentView(viewId);
-    setSelectedYear('all');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -175,23 +173,17 @@ export default function HomePage() {
     return data.tabData[currentView] || null;
   }, [data, currentView]);
 
-  // Filtered links for link_list view
+  // Links for link_list view
   const filteredLinkList = useMemo(() => {
     if (!activeCategoryData || activeCategoryData.type !== 'link_list') return [];
-    return activeCategoryData.links.filter(link => {
-      const matchYear = selectedYear === 'all' || link.year === selectedYear;
-      return matchYear;
-    });
-  }, [activeCategoryData, selectedYear]);
+    return activeCategoryData.links;
+  }, [activeCategoryData]);
 
-  // Filtered items for multi_link_list view
+  // Items for multi_link_list view
   const filteredMultiLinkList = useMemo(() => {
     if (!activeCategoryData || activeCategoryData.type !== 'multi_link_list') return [];
-    return activeCategoryData.items.filter(item => {
-      const matchYear = selectedYear === 'all' || item.year === selectedYear;
-      return matchYear;
-    });
-  }, [activeCategoryData, selectedYear]);
+    return activeCategoryData.items;
+  }, [activeCategoryData]);
 
   return (
     <div className="flex flex-col min-h-screen text-slate-800">
@@ -418,34 +410,7 @@ export default function HomePage() {
                 );
               })()}
 
-              {/* Year Filter Pills Bar */}
-              {data?.availableYears && data.availableYears.length > 0 && (
-                <div className="px-6 sm:px-8 py-3 bg-slate-100/60 border-b border-slate-200/60 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                  <button
-                    onClick={() => setSelectedYear('all')}
-                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap active:scale-95 ${
-                      selectedYear === 'all'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    ทั้งหมด
-                  </button>
-                  {data.availableYears.map(yr => (
-                    <button
-                      key={yr}
-                      onClick={() => setSelectedYear(yr)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap active:scale-95 ${
-                        selectedYear === yr
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      {yr}
-                    </button>
-                  ))}
-                </div>
-              )}
+
 
               {/* Category Content Body */}
               <div className="p-6 sm:p-8">
@@ -462,7 +427,7 @@ export default function HomePage() {
                       <FileText className="w-12 h-12 mx-auto text-slate-300 mb-2" />
                       <p className="font-semibold text-slate-600">ไม่พบเอกสาร</p>
                       <p className="text-xs text-slate-400 mt-1">
-                        ยังไม่มีข้อมูลเอกสารสำหรับปีการศึกษานี้
+                        ยังไม่มีข้อมูลเอกสารในหมวดหมู่นี้
                       </p>
                     </div>
                   ) : (
@@ -541,8 +506,7 @@ export default function HomePage() {
                   filteredMultiLinkList.length === 0 ? (
                     <div className="text-center py-16 text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                       <Layers className="w-12 h-12 mx-auto text-slate-300 mb-2" />
-                      <p className="font-semibold text-slate-600">ไม่พบข้อมูลปีการศึกษา</p>
-                      <p className="text-xs text-slate-400 mt-1">ลองเปลี่ยนตัวกรองปี</p>
+                      <p className="font-semibold text-slate-600">ยังไม่มีข้อมูลในหมวดหมู่นี้</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
