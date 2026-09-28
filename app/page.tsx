@@ -13,14 +13,12 @@ import {
   ArrowLeft,
   ExternalLink,
   ChevronRight,
-  Search,
   RotateCw,
   AlertTriangle,
   Calendar,
   Layers,
   Sparkles,
   Info,
-  X,
 } from 'lucide-react';
 import { AppPayload, Category, DocumentLink, YearGroupLinks } from '@/lib/types';
 
@@ -130,7 +128,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [currentView, setCurrentView] = useState('home');
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState('all');
   const [showDebug, setShowDebug] = useState(false);
 
@@ -163,7 +160,7 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  // Reset scroll and search when changing views
+  // Reset scroll when changing views
   const handleViewChange = (viewId: string) => {
     setCurrentView(viewId);
     setSelectedYear('all');
@@ -184,80 +181,18 @@ export default function HomePage() {
     if (!activeCategoryData || activeCategoryData.type !== 'link_list') return [];
     return activeCategoryData.links.filter(link => {
       const matchYear = selectedYear === 'all' || link.year === selectedYear;
-      const q = searchQuery.toLowerCase().trim();
-      const matchSearch =
-        q === '' ||
-        link.title.toLowerCase().includes(q) ||
-        (link.year && link.year.includes(q));
-      return matchYear && matchSearch;
+      return matchYear;
     });
-  }, [activeCategoryData, selectedYear, searchQuery]);
+  }, [activeCategoryData, selectedYear]);
 
   // Filtered items for multi_link_list view
   const filteredMultiLinkList = useMemo(() => {
     if (!activeCategoryData || activeCategoryData.type !== 'multi_link_list') return [];
     return activeCategoryData.items.filter(item => {
       const matchYear = selectedYear === 'all' || item.year === selectedYear;
-      const q = searchQuery.toLowerCase().trim();
-      const matchSearch =
-        q === '' ||
-        item.year.includes(q) ||
-        item.links.some(l => l.label.toLowerCase().includes(q));
-      return matchYear && matchSearch;
+      return matchYear;
     });
-  }, [activeCategoryData, selectedYear, searchQuery]);
-
-  // Search results across entire application (when user searches while on Home view)
-  const globalSearchResults = useMemo(() => {
-    if (!data || currentView !== 'home' || !searchQuery.trim()) return null;
-    const q = searchQuery.toLowerCase().trim();
-    const results: {
-      categoryTitle: string;
-      categoryId: string;
-      title: string;
-      year?: string;
-      url: string;
-      imageUrl?: string;
-    }[] = [];
-
-    data.categories.forEach(cat => {
-      const catData = data.tabData[cat.id];
-      if (!catData) return;
-
-      if (catData.type === 'link_list') {
-        catData.links.forEach(link => {
-          if (link.title.toLowerCase().includes(q) || (link.year && link.year.includes(q))) {
-            results.push({
-              categoryTitle: cat.title,
-              categoryId: cat.id,
-              title: link.title,
-              year: link.year,
-              url: link.url,
-              imageUrl: link.imageUrl,
-            });
-          }
-        });
-      } else if (catData.type === 'multi_link_list') {
-        catData.items.forEach(item => {
-          item.links.forEach(l => {
-            if (item.year.includes(q) || l.label.toLowerCase().includes(q) || cat.title.toLowerCase().includes(q)) {
-              if (l.url) {
-                results.push({
-                  categoryTitle: cat.title,
-                  categoryId: cat.id,
-                  title: `${l.label} (ปีการศึกษา ${item.year})`,
-                  year: item.year,
-                  url: l.url,
-                });
-              }
-            }
-          });
-        });
-      }
-    });
-
-    return results;
-  }, [data, currentView, searchQuery]);
+  }, [activeCategoryData, selectedYear]);
 
   return (
     <div className="flex flex-col min-h-screen text-slate-800">
@@ -367,86 +302,8 @@ export default function HomePage() {
                   รวบรวมมาตรฐานการศึกษา คู่มือการประเมิน ตารางวิเคราะห์ และรายงานการประเมินตนเอง (SAR) ของศูนย์การศึกษาพิเศษ ประจำจังหวัดลำปาง
                 </p>
 
-                {/* Instant Search Bar inside Hero */}
-                <div className="relative max-w-xl">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="ค้นหาชื่อเอกสาร, รายงาน SAR, มาตรฐาน, ปี พ.ศ...."
-                    className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-400/40 transition-all"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
               </div>
             </div>
-
-            {/* Global Search Results (if searching on Home) */}
-            {globalSearchResults && (
-              <div className="space-y-4 animate-fade-in-up">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <Search className="w-5 h-5 text-blue-600" />
-                    ผลการค้นหาสำหรับ &ldquo;{searchQuery}&rdquo; ({globalSearchResults.length} รายการ)
-                  </h3>
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="text-xs text-blue-600 hover:underline"
-                  >
-                    ล้างการค้นหา
-                  </button>
-                </div>
-
-                {globalSearchResults.length === 0 ? (
-                  <div className="bg-white rounded-3xl p-10 text-center text-slate-400 border border-dashed border-slate-200 shadow-sm">
-                    <Search className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-                    <p className="font-semibold text-slate-600">ไม่พบเอกสารที่ตรงกับคำค้นหา</p>
-                    <p className="text-xs mt-1">ลองเปลี่ยนคำค้นหา เช่น ระบุปี พ.ศ. หรือชื่อมาตรฐาน</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {globalSearchResults.map((res, i) => (
-                      <div
-                        key={i}
-                        className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-2 mb-2">
-                            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">
-                              {res.categoryTitle}
-                            </span>
-                            {res.year && (
-                              <span className="text-xs font-semibold text-slate-500">
-                                ปี {res.year}
-                              </span>
-                            )}
-                          </div>
-                          <h4 className="font-bold text-slate-800 text-sm mb-3 line-clamp-2">
-                            {res.title}
-                          </h4>
-                        </div>
-                        <a
-                          href={res.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-center text-white bg-blue-600 hover:bg-blue-700 shadow-sm flex items-center justify-center gap-1.5 transition-all mt-3 active:scale-95"
-                        >
-                          เปิดดูเอกสาร <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Skeleton Loading State */}
             {loading ? (
@@ -519,8 +376,8 @@ export default function HomePage() {
         ) : (
           /* VIEW 2: CATEGORY DETAIL VIEW */
           <div className="max-w-5xl mx-auto space-y-6 animate-fade-in-up">
-            {/* Top Back Button & Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Top Back Button */}
+            <div>
               <button
                 onClick={() => handleViewChange('home')}
                 className="flex items-center text-slate-700 hover:text-blue-700 bg-white border border-slate-200/80 px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-sm hover:shadow active:scale-95 transition-all group"
@@ -528,26 +385,6 @@ export default function HomePage() {
                 <ArrowLeft className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" />
                 กลับหน้าหลัก
               </button>
-
-              {/* In-Category Search Box */}
-              <div className="relative flex-grow sm:flex-grow-0 sm:w-72">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="ค้นหาในหมวดนี้..."
-                  className="w-full pl-10 pr-8 py-2 rounded-full border border-slate-200 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
             </div>
 
             {/* Category Main Container */}
@@ -630,7 +467,7 @@ export default function HomePage() {
                       <FileText className="w-12 h-12 mx-auto text-slate-300 mb-2" />
                       <p className="font-semibold text-slate-600">ไม่พบเอกสาร</p>
                       <p className="text-xs text-slate-400 mt-1">
-                        {searchQuery ? 'ลองเปลี่ยนคำค้นหา' : 'ยังไม่มีข้อมูลเอกสารสำหรับปีการศึกษานี้'}
+                        ยังไม่มีข้อมูลเอกสารสำหรับปีการศึกษานี้
                       </p>
                     </div>
                   ) : (
