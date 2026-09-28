@@ -15,7 +15,6 @@ import {
   ChevronRight,
   RotateCw,
   AlertTriangle,
-  Calendar,
   Layers,
   Sparkles,
   Info,
@@ -422,10 +421,6 @@ export default function HomePage() {
               {/* Year Filter Pills Bar */}
               {data?.availableYears && data.availableYears.length > 0 && (
                 <div className="px-6 sm:px-8 py-3 bg-slate-100/60 border-b border-slate-200/60 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                  <div className="flex items-center gap-1 text-xs font-semibold text-slate-500 mr-2 flex-shrink-0">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>ปีการศึกษา:</span>
-                  </div>
                   <button
                     onClick={() => setSelectedYear('all')}
                     className={`px-3 py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap active:scale-95 ${
