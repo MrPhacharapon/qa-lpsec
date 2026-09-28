@@ -542,7 +542,7 @@ export default function HomePage() {
                     <div className="text-center py-16 text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                       <Layers className="w-12 h-12 mx-auto text-slate-300 mb-2" />
                       <p className="font-semibold text-slate-600">ไม่พบข้อมูลปีการศึกษา</p>
-                      <p className="text-xs text-slate-400 mt-1">ลองเปลี่ยนตัวกรองปี หรือคำค้นหา</p>
+                      <p className="text-xs text-slate-400 mt-1">ลองเปลี่ยนตัวกรองปี</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
