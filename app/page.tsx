@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import {
   Table,
   FileText,
@@ -122,6 +123,61 @@ function getVisual(id: string): VisualConfig {
   return VISUAL_CONFIGS[id] || DEFAULT_VISUAL;
 }
 
+interface DocumentCoverProps {
+  imageUrl: string;
+  title: string;
+  priority?: boolean;
+  fallbackIcon: React.ElementType;
+  iconBg: string;
+}
+
+function DocumentCover({
+  imageUrl,
+  title,
+  priority = false,
+  fallbackIcon: FallbackIcon,
+  iconBg,
+}: DocumentCoverProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <div className="py-12 flex justify-center bg-slate-50 border-b border-slate-100">
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-inner ${iconBg}`}>
+          <FallbackIcon className="w-8 h-8" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-56 bg-slate-50 border-b border-slate-100 overflow-hidden relative flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-200/50 to-transparent z-10 pointer-events-none"></div>
+
+      {/* Skeleton Pulse during download/optimization */}
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-slate-100/90 animate-pulse flex items-center justify-center z-10">
+          <FileText className="w-10 h-10 text-slate-300 animate-pulse" />
+        </div>
+      )}
+
+      <Image
+        src={imageUrl}
+        alt={title}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 450px"
+        className={`object-contain p-3 relative z-20 group-hover:scale-105 transition-all duration-500 drop-shadow-md ${
+          isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}
+        priority={priority}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => setHasError(true)}
+      />
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [data, setData] = useState<AppPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -194,14 +250,14 @@ export default function HomePage() {
             className="flex items-center space-x-3.5 cursor-pointer group"
             onClick={() => handleViewChange('home')}
           >
-            <div className="w-13 h-13 sm:w-14 sm:h-14 flex-shrink-0 p-1 bg-white rounded-full shadow-sm border border-slate-100 group-hover:scale-105 transition-transform">
-              <img
+            <div className="w-13 h-13 sm:w-14 sm:h-14 flex-shrink-0 p-1 bg-white rounded-full shadow-sm border border-slate-100 group-hover:scale-105 transition-transform relative">
+              <Image
                 src={LOGO_URL}
                 alt="โลโก้ศูนย์การศึกษาพิเศษ"
+                width={56}
+                height={56}
                 className="w-full h-full object-contain"
-                onError={e => {
-                  (e.target as HTMLImageElement).src = 'https://cdn-icons-png.flaticon.com/512/1256/1256675.png';
-                }}
+                priority
               />
             </div>
             <div>
@@ -445,19 +501,13 @@ export default function HomePage() {
                           >
                             {/* Image Header or Fallback Icon */}
                             {link.imageUrl ? (
-                              <div className="w-full h-56 bg-slate-50 border-b border-slate-100 overflow-hidden relative flex items-center justify-center p-4">
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-200/50 to-transparent z-10 pointer-events-none"></div>
-                                <img
-                                  src={link.imageUrl}
-                                  alt={link.title}
-                                  className="max-w-full max-h-full object-contain relative z-20 group-hover:scale-105 transition-transform duration-500 drop-shadow-md"
-                                  onError={e => {
-                                    // If image fails to load, replace with clean container
-                                    const parent = (e.target as HTMLElement).parentElement;
-                                    if (parent) parent.style.display = 'none';
-                                  }}
-                                />
-                              </div>
+                              <DocumentCover
+                                imageUrl={link.imageUrl}
+                                title={link.title}
+                                priority={idx < 2}
+                                fallbackIcon={IconComp}
+                                iconBg={visual.iconBg}
+                              />
                             ) : (
                               <div className="py-12 flex justify-center bg-slate-50 border-b border-slate-100">
                                 <div
