@@ -333,23 +333,16 @@ export default function HomePage() {
         {currentView === 'home' ? (
           <div className="space-y-8">
             {/* Hero Welcome Banner */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-800 to-blue-950 text-white p-7 sm:p-12 shadow-xl border border-white/10 animate-fade-in-up">
-              <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
-              <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-              
-              <div className="relative z-10 max-w-3xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-blue-200 text-xs font-semibold mb-4 border border-white/10">
-                  <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                  ระบบสารสนเทศงานประกันคุณภาพสถานศึกษา
-                </div>
-                <h2 className="text-2xl sm:text-4xl font-extrabold mb-3 leading-tight tracking-tight">
-                  ยินดีต้อนรับเข้าสู่ระบบงานประกันคุณภาพ
-                </h2>
-                <p className="text-blue-100 text-sm sm:text-base font-light opacity-90 mb-6 max-w-2xl leading-relaxed">
-                  รวบรวมมาตรฐานการศึกษา คู่มือการประเมิน ตารางวิเคราะห์ และรายงานการประเมินตนเอง (SAR) ของศูนย์การศึกษาพิเศษ ประจำจังหวัดลำปาง
-                </p>
-
-              </div>
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl border border-slate-200/90 bg-white animate-fade-in-up transition-all">
+              <Image
+                src="/banner/header-lampang-references-20260929.webp"
+                alt="งานประกันคุณภาพการศึกษา ศูนย์การศึกษาพิเศษ ประจำจังหวัดลำปาง"
+                width={2060}
+                height={763}
+                priority
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
+                className="w-full h-auto block select-none"
+              />
             </div>
 
             {/* Skeleton Loading State */}
@@ -375,14 +368,6 @@ export default function HomePage() {
                   const catData = data.tabData[cat.id];
                   const delayClass = `delay-${(index % 6 + 1) * 100}`;
 
-                  // Calculate item count badge
-                  let itemCountText = '';
-                  if (catData?.type === 'link_list') {
-                    itemCountText = `${catData.links.length} รายการ`;
-                  } else if (catData?.type === 'multi_link_list') {
-                    itemCountText = `${catData.items.length} ปีการศึกษา`;
-                  }
-
                   return (
                     <div
                       key={cat.id}
@@ -400,15 +385,10 @@ export default function HomePage() {
                           <IconComp className="w-8 h-8 text-white" />
                         </div>
                         <h3
-                          className={`text-lg font-bold text-slate-800 mb-2 transition-colors duration-300 ${visual.textHover}`}
+                          className={`text-lg font-bold text-slate-800 mb-4 transition-colors duration-300 ${visual.textHover}`}
                         >
                           {cat.title}
                         </h3>
-                        {itemCountText && (
-                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 mb-4">
-                            {itemCountText}
-                          </span>
-                        )}
                         <div className="w-full border-t border-slate-100 pt-4 mt-auto flex items-center justify-center text-xs sm:text-sm font-medium text-slate-400 group-hover:text-slate-700 transition-colors">
                           คลิกดูรายละเอียด
                           <ChevronRight className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" />
@@ -453,13 +433,6 @@ export default function HomePage() {
                         <h2 className="text-xl sm:text-2xl font-black text-slate-800">
                           {activeCategory?.title || 'หมวดหมู่'}
                         </h2>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          {activeCategoryData?.type === 'link_list'
-                            ? `เอกสารทั้งหมด (${filteredLinkList.length} รายการ)`
-                            : activeCategoryData?.type === 'multi_link_list'
-                            ? `ข้อมูลรายปีการศึกษา (${filteredMultiLinkList.length} ปี)`
-                            : ''}
-                        </p>
                       </div>
                     </div>
                   </div>
